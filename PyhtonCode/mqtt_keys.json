@@ -1,0 +1,5 @@
+{
+    "username": "MQTT username",
+    "password": "MQTT PASSWORD",
+    "broker":"MQTT IP ADDRESS"
+}
