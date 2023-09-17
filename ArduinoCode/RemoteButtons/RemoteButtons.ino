@@ -1,15 +1,15 @@
-/* -----------------------------------------------------------
-* Arduino Code to read button presses and send them to the 
-*  Receiver 
-*  
-* (C) 2023 Daniel VanVolkinburg 
-* Released under GNU Public License (GPL)
-* email dvanvolk@ieee.org
-* -----------------------------------------------------------*/
+//=================================================================================================
+/// Arduino Code to read button presses and send them to the Receiver 
+///
+/// (C) 2023 Daniel VanVolkinburg 
+/// Released under GNU Public License (GPL)
+/// email dvanvolk@ieee.org
+//=================================================================================================
 #include <Button.h>
-#include <LED.h>
+#include "DVLED.h"
 
-// Hardware Configuration
+// -- Hardware Configuration ---
+// Buttons
 #define RED_BUTTON_PIN A1
 Button mCRedButton = Button(RED_BUTTON_PIN,PULLUP);
 #define UP_BUTTON_PIN A2
@@ -17,27 +17,28 @@ Button mCUpButton = Button(UP_BUTTON_PIN,PULLUP);
 #define DOWN_BUTTON_PIN A3
 Button mCDownButton = Button(DOWN_BUTTON_PIN,PULLUP);
 
+// LEDs
 #define BUILT_IN_LED 13
-LED mCBuiltInLed = LED(BUILT_IN_LED);
+CDVLED mCBuiltInLed = CDVLED( BUILT_IN_LED, HIGH );
 #define RED_POWER_LED 6
-LED mCPowerLed = LED(RED_POWER_LED);
+CDVLED mCPowerLed = CDVLED(RED_POWER_LED, LOW );
 #define RED_STATUS_LED 12
-LED mCRedStatusLed = LED(RED_STATUS_LED);
+CDVLED mCRedStatusLed = CDVLED(RED_STATUS_LED, LOW );
 #define YELLOW_STATUS_LED 11
-LED mCYellowStatusLed = LED(YELLOW_STATUS_LED);
+CDVLED mCYellowStatusLed = CDVLED(YELLOW_STATUS_LED, LOW );
 #define GREEN_STATUS_LED 10
-LED mCGreenStatusLed = LED(GREEN_STATUS_LED);
+CDVLED mCGreenStatusLed = CDVLED(GREEN_STATUS_LED, LOW );
 
 //-------------------------------------------------
 // Default Arduino Setup Function
 //-------------------------------------------------
 void setup() 
 {
-    mCBuiltInLed.off();
-    mCPowerLed.off();
-    mCRedStatusLed.off();
-    mCYellowStatusLed.off();
-    mCGreenStatusLed.off();
+    mCBuiltInLed.Off();
+    mCPowerLed.Off();
+    mCRedStatusLed.Off();
+    mCYellowStatusLed.Off();
+    mCGreenStatusLed.Off();
 
 }
 
@@ -48,32 +49,32 @@ void loop()
 {
   if(mCRedButton.isPressed())
   {
-    mCRedStatusLed.on();
+    mCRedStatusLed.On();
   }
   else
   {
-    mCRedStatusLed.off();
+    mCRedStatusLed.Off();
   }
 
   if(mCUpButton.isPressed())
   {
-    mCYellowStatusLed.on();
+    mCYellowStatusLed.On();
   }
   else
   {
-    mCYellowStatusLed.off();
+    mCYellowStatusLed.Off();
   }
 
   if(mCDownButton.isPressed())
   {
-    mCGreenStatusLed.on();
+    mCGreenStatusLed.On();
   }
   else
   {
-    mCGreenStatusLed.off();
+    mCGreenStatusLed.Off();
   }
 
-  mCPowerLed.blink(500);  
+  // mCPowerLed.blink(500);  
   // mCRedStatusLed.blink(500);
   // mCYellowStatusLed.blink(500);
   // mCGreenStatusLed.blink(500);
