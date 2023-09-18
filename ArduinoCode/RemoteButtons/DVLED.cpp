@@ -11,11 +11,11 @@
 
 //-------------------------------------------------------------------------------------------------
 /// Constructor
-///  Automatically calls the pin intialization function
+///  Automatically calls the pin initialization function
 ///
 /// @param   nLedPin        GPIO pin the led is connected to
-/// @param   nOnValue		  HIGH = a write of HIGH will enable the LED, the LED is active HIGH
-///						   LOW = a write of LOW will enable the LED, the LED is active LOW
+/// @param   nOnValue		HIGH = a write of HIGH will enable the LED, the LED is active HIGH
+///						     LOW = a write of LOW will enable the LED, the LED is active LOW
 //-------------------------------------------------------------------------------------------------
 CDVLED::CDVLED( uint8_t nLedPin, uint8_t nOnValue ) 
   : mnPreviousMillis( 0 )
@@ -28,21 +28,6 @@ CDVLED::CDVLED( uint8_t nLedPin, uint8_t nOnValue )
 {
 	Init( nLedPin, nOnValue );
 }
-
-//-------------------------------------------------------------------------------------------------
-/// Initalizes the LED Set the GPIO pin as an output
-///
-/// @param   nLedPin          GPIO pin the led is connected to
-/// @param   nOnValue		  HIGH = a write of HIGH will enable the LED, the LED is active HIGH
-///							   LOW = a write of LOW will enable the LED, the LED is active LOW
-//-------------------------------------------------------------------------------------------------
-void CDVLED::Init( uint8_t nLedPin, uint8_t nOnValue )
-{
-	mnOnValue = nOnValue;
-	mnPin = nLedPin;
-	pinMode( mnPin, OUTPUT );
-	Off();
-}	 
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the current LED state
@@ -134,6 +119,21 @@ void CDVLED::Update( void )
 	  }
 	}
   }
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Initializes the LED Set the GPIO pin as an output
+///
+/// @param   nLedPin          GPIO pin the led is connected to
+/// @param   nOnValue		  HIGH = a write of HIGH will enable the LED, the LED is active HIGH
+///							   LOW = a write of LOW will enable the LED, the LED is active LOW
+//-------------------------------------------------------------------------------------------------
+void CDVLED::Init( uint8_t nLedPin, uint8_t nOnValue )
+{
+	mnOnValue = nOnValue;
+	mnPin = nLedPin;
+	pinMode( mnPin, OUTPUT );
+	Off();
 }
 
 //-------------------------------------------------------------------------------------------------

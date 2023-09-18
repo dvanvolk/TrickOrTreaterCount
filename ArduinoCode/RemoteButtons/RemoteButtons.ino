@@ -7,6 +7,7 @@
 //=================================================================================================
 #include <Button.h>
 #include "DVLED.h"
+#include "RadioInterface.h"
 
 // -- Hardware Configuration ---
 // Buttons
@@ -29,11 +30,20 @@ CDVLED mCYellowStatusLed = CDVLED(YELLOW_STATUS_LED, LOW );
 #define GREEN_STATUS_LED 10
 CDVLED mCGreenStatusLed = CDVLED(GREEN_STATUS_LED, LOW );
 
+// Radio Hardware (Feather M0)
+#define RFM95_CS    8
+#define RFM95_INT   3
+#define RFM95_RST   4
+
+ CRadioInterface mRadio = CRadioInterface(RFM95_CS, RFM95_INT, RFM95_RST);
+
 //-------------------------------------------------
 // Default Arduino Setup Function
 //-------------------------------------------------
 void setup() 
 {
+    Serial.begin(115200);
+
     mCBuiltInLed.Off();
     mCPowerLed.Off();
     mCRedStatusLed.Off();

@@ -46,16 +46,6 @@ class CDVLED
 
 	  // Class implementation 
 	public:  
-	
-		//-------------------------------------------------------------------------------------------------
-		/// Initialises the LED Set the GPIO pin as an output
-		///
-		/// @param   nLedPin          GPIO pin the led is connected to
-		/// @param   nOnValue		  HIGH = a write of HIGH will enable the LED, the LED is active HIGH
-		///							   LOW = a write of LOW will enable the LED, the LED is active LOW
-		//-------------------------------------------------------------------------------------------------
-		void Init( uint8_t nLedPin, uint8_t nOnValue );	 
-
 		//-------------------------------------------------------------------------------------------------
 		/// Returns the current LED state
 		///
@@ -99,6 +89,15 @@ class CDVLED
 		void Update( void );
 
    private:
+
+		//-------------------------------------------------------------------------------------------------
+		/// Initialises the LED Set the GPIO pin as an output
+		///
+		/// @param   nLedPin          GPIO pin the led is connected to
+		/// @param   nOnValue		  HIGH = a write of HIGH will enable the LED, the LED is active HIGH
+		///							   LOW = a write of LOW will enable the LED, the LED is active LOW
+		//-------------------------------------------------------------------------------------------------
+		void Init( uint8_t nLedPin, uint8_t nOnValue );	 
 
 		//-------------------------------------------------------------------------------------------------
 		/// Starts or Stops the LED Sequence
