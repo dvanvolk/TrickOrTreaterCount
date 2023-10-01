@@ -5,12 +5,15 @@
 /// Released under GNU Public License (GPL)
 /// email dvanvolk@ieee.org
 //=================================================================================================
-#include <Button.h>
 #include "DVLED.h"
 
 #include <SPI.h>
 #include <RH_RF69.h>
 #include <RHReliableDatagram.h>
+
+// Include the Bounce2 library found here :
+// https://github.com/thomasfredericks/Bounce2
+#include <Bounce2.h>
 
 void RadioInit( void );
 void SendMessage( uint8_t dataId );
@@ -18,11 +21,12 @@ void SendMessage( uint8_t dataId );
 // -- Hardware Configuration ---
 // Buttons
 #define RED_BUTTON_PIN A1
-Button mCRedButton = Button(RED_BUTTON_PIN,PULLUP);
+Bounce2::Button mCRedButton = Bounce2::Button();
 #define UP_BUTTON_PIN A2
-Button mCUpButton = Button(UP_BUTTON_PIN,PULLUP);
+Bounce2::Button mCUpButton = Bounce2::Button();
 #define DOWN_BUTTON_PIN A3
-Button mCDownButton = Button(DOWN_BUTTON_PIN,PULLUP);
+Bounce2::Button mCDownButton = Bounce2::Button();
+#define BUTTON_INTERVAL_MS 5
 
 // LEDs
 #define BUILT_IN_LED 13
@@ -64,13 +68,25 @@ void setup()
 {
     Serial.begin(115200);
 
+    mCRedButton.attach( RED_BUTTON_PIN,  INPUT_PULLUP );
+    mCRedButton.interval(BUTTON_INTERVAL_MS);
+    mCRedButton.setPressedState(LOW); 
+
+    mCUpButton.attach( UP_BUTTON_PIN,  INPUT_PULLUP );
+    mCUpButton.interval(BUTTON_INTERVAL_MS);
+    mCUpButton.setPressedState(LOW); 
+
+    mCDownButton.attach( DOWN_BUTTON_PIN,  INPUT_PULLUP );
+    mCDownButton.interval(BUTTON_INTERVAL_MS);
+    mCDownButton.setPressedState(LOW); 
+
     mCBuiltInLed.Off();
     mCPowerLed.Off();
     mCRedStatusLed.Off();
     mCYellowStatusLed.Off();
     mCGreenStatusLed.Off();
 
-
+    RadioInit();
 
 }
 
@@ -79,37 +95,40 @@ void setup()
 //-------------------------------------------------
 void loop() 
 {
-  if(mCRedButton.isPressed())
+  mCRedButton.update();
+  mCUpButton.update();
+  mCDownButton.update();
+
+  if ( mCRedButton.pressed() ) 
   {
     mCRedStatusLed.On();
+    SendMessage(1);
   }
-  else
+  else if( mCRedButton.released() )
   {
     mCRedStatusLed.Off();
   }
+  
 
-  if(mCUpButton.isPressed())
+  if ( mCUpButton.pressed() ) 
   {
     mCYellowStatusLed.On();
+    SendMessage(2);
   }
-  else
+  else if( mCUpButton.released() )
   {
     mCYellowStatusLed.Off();
   }
 
-  if(mCDownButton.isPressed())
+  if ( mCDownButton.pressed() ) 
   {
     mCGreenStatusLed.On();
+    SendMessage(3);
   }
-  else
+  else if( mCDownButton.released() )
   {
     mCGreenStatusLed.Off();
   }
-
-  // mCPowerLed.blink(500);  
-  // mCRedStatusLed.blink(500);
-  // mCYellowStatusLed.blink(500);
-  // mCGreenStatusLed.blink(500);
 }
 
 void RadioInit( void )
