@@ -33,10 +33,10 @@ class RadioProtocolHandler(LineReader):
            Function checks for known string signatures that contain "button", and "heart"
         """
         numeric_data = int(re.search(r'\d+', data).group()) - 1
-        if "Button:" in data:
-            self._process_button(numeric_data)
+        if "Button" in data:
+            self.__process_button(numeric_data)
         elif "Heart" in data:
-            self._process_heart(numeric_data)
+            self.__process_heart(numeric_data)
         else:
             print(f"Unexpected Data: {data}")    
 
@@ -54,7 +54,7 @@ class RadioProtocolHandler(LineReader):
         """Function sets the callback of the Heartbeat"""
         self.heart_callback = heart_cb
         
-    def _process_button(self, button_index):
+    def __process_button(self, button_index):
         """handle a button receive data by calling a callback if configured"""
         if len(self.event_callback_list) > button_index:
                 if self.event_callback_list[button_index] is not None:
@@ -62,7 +62,7 @@ class RadioProtocolHandler(LineReader):
         else:
             print(f"Low list index")
 
-    def _process_heart(self, id):
+    def __process_heart(self, id):
         """handle a heart receive data by calling a callback if configured"""
         print(f"Radio Heart: {id}")  
 
@@ -109,15 +109,16 @@ if __name__ == '__main__':
     print("Start")
     callbacks = [test_button_callback, test_button_callback, test_button_callback]
     test_interface = RadioInterface()
-    test_interface.start(button_callbacks=callbacks)
+    test_interface.start(port= "COM7", button_callbacks=callbacks)
 
-    for button_idx in range(1,4):
-        test_interface.send_data(f"Button: {button_idx}")
+    # for button_idx in range(1,4):
+    #     test_interface.send_data(f"Button {button_idx}")
 
-    for heart_idx in range(1,10):
-        test_interface.send_data(f"Heart: {heart_idx}")
+    # for heart_idx in range(1,10):
+    #     test_interface.send_data(f"Heart: {heart_idx}")
 
-    time.sleep(1)  # Need to sleep here and allow the RX thread time to run
-    print("exit")
-    test_interface.exit()
+    # time.sleep(1)  # Need to sleep here and allow the RX thread time to run
+    # print("exit")
+    # test_interface.exit()
+    input("Press Enter to end...")
     print("End")

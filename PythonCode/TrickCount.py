@@ -31,6 +31,12 @@ class trick_count:
         self.raw_timestamp_df = pd.concat([self.raw_timestamp_df, pd.DataFrame({'count': 1}, index = [time_now])])
         print(f"{time_now} New Trick-or-Treater")
 
+    def decrease(self):
+        """Remove the last entry incase the button is accidentally pressed"""
+        time_now = datetime.now()
+        self.raw_timestamp_df.drop(self.raw_timestamp_df.tail(1).index,inplace=True)
+        print(f"{time_now} Remove -- Trick-or-Treater")
+
     def mark(self):
         """set the new min to zero, which is a lazy way of inserting some zero into the graph"""
         time_now = datetime.now()
@@ -65,7 +71,7 @@ class trick_count:
         one_min_bar_plot.set_ylabel("Count (Min)")
         one_min_bar_plot.set_title("Count by Min")
 
-        fifteen_min_data = self.raw_timestamp_df['count'].resample('15min').sum()  
+        fifteen_min_data = self.raw_timestamp_df['count'].resample('15min').sum().fillna(0)  
         fifteen_min_bar_plot = fifteen_min_data.plot.bar(
             color='red'
             )

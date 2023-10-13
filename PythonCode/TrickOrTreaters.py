@@ -15,13 +15,14 @@ import schedule
 from datetime import datetime
 from threading import Thread
 from TrickCount import trick_count
+from serial_interface import RadioInterface
 from mqtt_interface import mqtt
 from adafruit_io import adafruit_io_interface
 
 REPORT_TIME_SEC = 60
 
 class TrickOrTreaterTracker:
-    def __init__(self, mqtt_config, aio_config):
+    def __init__(self, mqtt_config, aio_config, serial_port):
         """Init Class and create MQTT interface and Monitoring Thread"""
         self.tc = trick_count()
         subscribe_list = ["Halloween\ButtonPress"]
@@ -33,11 +34,18 @@ class TrickOrTreaterTracker:
 
         self.feedlist = ['totalcount', 'count']
         self.aio = adafruit_io_interface(aio_config, self.feedlist)
+
+        self.serial_port = serial_port
+        self.serial_radio = RadioInterface()
+        button_callback = [self.__count_btn_callback, None, self.__down_btn_callback]
+        self.serial_radio.start(self.serial_port, button_callbacks = button_callback)
         
     def start(self):
-        """Start taking numbers, wait here till the user types end"""
-        print("Start Counting")
+        """Start taking numbers, wait here till the user types "end" """
         self.daemon.start()
+
+        print("Start Counting")
+        
         continue_thread = True
         while continue_thread:
             input_str = input()
@@ -50,12 +58,23 @@ class TrickOrTreaterTracker:
     def __msg_callback(self, msg_topic):
         """Callback from the MQTT class when a new message is received"""
         self.tc.increase()
+    
+    def __count_btn_callback(self):
+        """Callback from the button interface when the count should be increased"""
+        print(f"Button Press")
+        self.tc.increase()
+        
+    def __down_btn_callback(self):
+        """Incase of too many button presses, remove the last entry"""
+        self.tc.decrease()
 
     def __process_finish(self):
         """Complete the counting process and show the graph"""
         self.monitor = False
-        print(f"Total Count: {self.tc.get_total_count()}")
-        self.tc.plot_output()
+        total_count = self.tc.get_total_count()
+        print(f"Total Count: {total_count}")
+        if total_count > 0:
+            self.tc.plot_output()
 
     def __schedule_thread(self):
         """Thread to report the latest count every minuit, thread runs the scheduler to do the event on the min"""
@@ -67,7 +86,6 @@ class TrickOrTreaterTracker:
             elif sleep_time > 0:
                 # sleep exactly the right amount of time
                 time.sleep(sleep_time) # close enough?
-            # time.sleep(1)
             schedule.run_pending()
         schedule.cancel_job(self.report_schedule)
 
@@ -78,7 +96,7 @@ class TrickOrTreaterTracker:
         self.aio.send_status(self.feedlist[0], int(total_count))
         self.aio.send_status(self.feedlist[1], int(min_count))
         print(f"Report Time Now: {datetime.now()} Last Min Count: {min_count}, Total: {total_count}")
-        self.tc.mark()
+        # self.tc.mark()
 
 
 def is_file(value):
@@ -97,6 +115,7 @@ if __name__ == '__main__':
                                      description='Timestamp Button Presses, counting Trick-Or-Treaters and publish results')
     parser.add_argument('-fm', required=False, type = is_file, default="mqtt_keys.json", help="Json Config File for local MQTT broker")
     parser.add_argument('-fa', required=False, type = is_file, default="adafruit_info.json", help="Json Config File for Adafrut Io Interface")
+    parser.add_argument('-p', required=False, default="COM10", help="Serial port, the radio interface is connected to")
     args = parser.parse_args()
 
     aio_config = None
@@ -109,6 +128,5 @@ if __name__ == '__main__':
         aio_config = json.load(config_file)
 
     if mqtt_config is not None:    
-        TrickOrTreaterTracker(mqtt_config, aio_config).start()
+        TrickOrTreaterTracker(mqtt_config, aio_config, args.p).start()
         
-
