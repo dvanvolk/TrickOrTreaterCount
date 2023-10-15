@@ -16,7 +16,8 @@
 #include <Bounce2.h>
 
 void RadioInit( void );
-void SendMessage( uint8_t dataId );
+void SendMessage( char* message );
+void HeartBeat( void );
 
 // -- Hardware Configuration ---
 // Buttons
@@ -61,6 +62,10 @@ RHReliableDatagram rf69_manager(rf69, RADIO_ADDRESS);
 uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
 uint8_t data[] = "  OK";
 
+unsigned long previousMillis = 0;  // will store last time LED was updated
+const long interval = 1000;  // interval at which to blink (milliseconds)
+unsigned long heart_count = 0;
+
 //-------------------------------------------------
 // Default Arduino Setup Function
 //-------------------------------------------------
@@ -81,7 +86,7 @@ void setup()
     mCDownButton.setPressedState(LOW); 
 
     mCBuiltInLed.Off();
-    mCPowerLed.Off();
+    mCPowerLed.On();
     mCRedStatusLed.Off();
     mCYellowStatusLed.Off();
     mCGreenStatusLed.Off();
@@ -95,6 +100,7 @@ void setup()
 //-------------------------------------------------
 void loop() 
 {
+  char Button_Message[20] = "Button ";
   mCRedButton.update();
   mCUpButton.update();
   mCDownButton.update();
@@ -102,18 +108,19 @@ void loop()
   if ( mCRedButton.pressed() ) 
   {
     mCRedStatusLed.On();
-    SendMessage(1);
+    itoa(1, Button_Message+7, 10);
+    SendMessage( Button_Message );
   }
   else if( mCRedButton.released() )
   {
     mCRedStatusLed.Off();
   }
   
-
   if ( mCUpButton.pressed() ) 
   {
     mCYellowStatusLed.On();
-    SendMessage(2);
+    itoa(2, Button_Message+7, 10);
+    SendMessage( Button_Message );
   }
   else if( mCUpButton.released() )
   {
@@ -123,12 +130,15 @@ void loop()
   if ( mCDownButton.pressed() ) 
   {
     mCGreenStatusLed.On();
-    SendMessage(3);
+    itoa(3, Button_Message+7, 10);
+    SendMessage( Button_Message );
   }
   else if( mCDownButton.released() )
   {
     mCGreenStatusLed.Off();
   }
+
+  HeartBeat();
 }
 
 void RadioInit( void )
@@ -168,18 +178,16 @@ void RadioInit( void )
   Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz");
 }
 
-void SendMessage( uint8_t dataId )
+void SendMessage( char* message )
 {
-  char radiopacket[20] = "Button ";
-
-  itoa(dataId, radiopacket+7, 10);
-// Send a message to the DESTINATION!
-  if (rf69_manager.sendtoWait((uint8_t *)radiopacket, strlen(radiopacket), SERVER_ADDRESS))
+  // Send a message to the DESTINATION!
+  if (rf69_manager.sendtoWait((uint8_t*)message, strlen(message), SERVER_ADDRESS))
   {
     // Now wait for a reply from the server
     uint8_t len = sizeof(buf);
     uint8_t from;
-    if (rf69_manager.recvfromAckTimeout(buf, &len, 2000, &from)) {
+    if (rf69_manager.recvfromAckTimeout(buf, &len, 2000, &from)) 
+    {
       buf[len] = 0; // zero out remaining string
 
       Serial.print("Got reply from #"); Serial.print(from);
@@ -187,10 +195,31 @@ void SendMessage( uint8_t dataId )
       Serial.print(rf69.lastRssi());
       Serial.print("] : ");
       Serial.println((char*)buf);
-    } else {
+    } 
+    else 
+    {
       Serial.println("No reply, is anyone listening?");
     }
-  } else {
+  } 
+  else 
+  {
     Serial.println("Sending failed (no ack)");
+  }
+}
+
+void HeartBeat(void)
+{
+  char Heart_Message[20] = "Heart ";
+    
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) 
+  {
+    // save the last time you blinked the LED
+    previousMillis = currentMillis;
+    heart_count++;
+    itoa(heart_count, Heart_Message+7, 12);
+
+    mCPowerLed.Toggle();
+    SendMessage( Heart_Message );
   }
 }

@@ -61,7 +61,6 @@ class TrickOrTreaterTracker:
     
     def __count_btn_callback(self):
         """Callback from the button interface when the count should be increased"""
-        print(f"Button Press")
         self.tc.increase()
         
     def __down_btn_callback(self):

@@ -1,0 +1,6 @@
+adafruit_io==2.7.0
+matplotlib==3.7.2
+paho_mqtt==1.6.1
+pandas==2.0.3
+pyserial==3.5
+schedule==1.2.0
