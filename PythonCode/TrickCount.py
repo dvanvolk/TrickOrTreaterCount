@@ -9,11 +9,15 @@
 
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
+import matplotlib.dates as mdates
 import pandas as pd
 
 import time
 import random
 from random import randrange
+
+import numpy as np #used for testing only
 
 class trick_count:
     def __init__(self):
@@ -62,24 +66,39 @@ class trick_count:
         return sum
     
     def plot_output(self): 
-        """Create some graphs and save the data"""
-       
+        """Create some graphs and save the data"""  
         min_data = self.raw_timestamp_df['count'].resample('min').sum()
         min_df = pd.DataFrame(min_data)
+        min_df.index = pd.to_datetime(min_df.index, format = '%I:%M:%S').strftime('%I:%M')
         min_plot = min_df.plot.bar(color = 'purple')
         min_plot.set_xlabel("Time Stamp")
+        # min_plot.xaxis.set_major_locator(mdates.MinuteLocator(interval=1)) 
         min_plot.set_ylabel("Count (Min)")
         min_plot.set_title("Count by Min")
-
+    
         fifteen_min_data = self.raw_timestamp_df['count'].resample('15min').sum()
         fifteen_min_df = pd.DataFrame(fifteen_min_data)
+        fifteen_min_df.index = pd.to_datetime(fifteen_min_df.index, format = '%I:%M:%S').strftime('%I:%M')
         fifteen_min_bar_plot = fifteen_min_df.plot.bar( color='red' )
         fifteen_min_bar_plot.set_xlabel("Time Stamp")
         fifteen_min_bar_plot.set_ylabel("Count (Min)")
         fifteen_min_bar_plot.set_title("Count by 15 Mins")
         
-        raw_bar_plot = self.raw_timestamp_df.plot.bar( color='green' )
-        raw_bar_plot.set_title("Raw Timestamped data")
+        # raw_bar_plot = self.raw_timestamp_df.plot.bar( color='green' )
+        # raw_bar_plot.set_title("Raw Timestamped data")
+        self.raw_timestamp_df['total_count'] = self.raw_timestamp_df['count'].cumsum()
+        
+        # Create a timeline plot of the total count
+        plt.figure(figsize=(10, 3))
+        plt.plot(self.raw_timestamp_df.index, range(len(self.raw_timestamp_df)), marker='x', linestyle='-')
+        plt.yticks(range(len(self.raw_timestamp_df)), self.raw_timestamp_df['total_count'])
+        plt.gca().xaxis.set_major_formatter(DateFormatter('%I:%M'))
+        plt.gca().xaxis.set_major_locator(mdates.MinuteLocator(interval=15))
+        plt.xlabel('Time')
+        plt.xticks(minor=True)
+        plt.title('Total Trick-or-Treaters')
+        plt.grid(axis='x')
+        plt.tight_layout()
         
         raw_file_name = f"{datetime.today().year}_RawTrickOrTreatData.csv"
         self.raw_timestamp_df.to_csv(raw_file_name, encoding='utf-8')
@@ -92,35 +111,41 @@ class trick_count:
 
         plt.show()
 
-
-def test_plot():
-    count = [0, 1, 2, 2, 1, 0, 5, 3, 0, 1]
-    index = [pd.Timestamp('2023-10-14 16:40:00'),
-             pd.Timestamp('2023-10-14 16:41:00'),
-             pd.Timestamp('2023-10-14 16:42:00'),
-             pd.Timestamp('2023-10-14 16:43:00'),
-             pd.Timestamp('2023-10-14 16:44:00'),
-             pd.Timestamp('2023-10-14 16:45:00'),
-             pd.Timestamp('2023-10-14 16:46:00'),
-             pd.Timestamp('2023-10-14 16:47:00'),
-             pd.Timestamp('2023-10-14 16:48:00'),
-             pd.Timestamp('2023-10-14 16:49:00')]
-    df = pd.DataFrame({'count': count}, index=index)
-    df.plot.bar() 
-    plt.show()
-
-
-
+def generate_test_data():
+    """Generate a data set to test graphing with"""
+    number_of_hours = 3
+    number_of_trick_or_treaters = random.randint(30, 100)
+    end_time = datetime.now()
+    start_time = end_time - timedelta(hours=number_of_hours)
         
+    random_times_list = []
+    
+    for _ in range(number_of_trick_or_treaters):
+        random_min = random.randint(0, (number_of_hours * 60))
+        random_time = (start_time + timedelta(minutes=random_min))
+        random_times_list.append(random_time)
+    df = pd.DataFrame({'Time': random_times_list, 'count': 1}).sort_values('Time')
+    # df['total_count'] = df['count'].cumsum()
+    df = df.set_index('Time')
+    # print(df)
+
+    tc = trick_count()
+    tc.raw_timestamp_df = df
+    
+    tc.plot_output()
+    
+
 if __name__ == '__main__':
     """TEST the Class"""
     print("Start Test Counting")
-    tc = trick_count()
-    for x in range(0,15):
-        time.sleep(random.randint(1, (60*2)))
-        tc.increase()      
+    generate_test_data()
 
-    print("Done")
-    print(f"Time Now: {datetime.now()} Last Min Count: {tc.get_last_minute_count()}")
-    print(f"Total Sum: {tc.get_total_count()}")
-    tc.plot_output()
+    """simulate data, in real time"""
+    # tc = trick_count()
+    # for x in range(0,15):
+    #     time.sleep(random.randint(1, (60*2)))
+    #     tc.increase()      
+    # print("Done")
+    # print(f"Time Now: {datetime.now()} Last Min Count: {tc.get_last_minute_count()}")
+    # print(f"Total Sum: {tc.get_total_count()}")
+    # tc.plot_output()
