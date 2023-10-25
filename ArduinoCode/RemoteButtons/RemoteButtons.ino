@@ -16,7 +16,7 @@
 #include <Bounce2.h>
 
 void RadioInit( void );
-void SendMessage( char* message );
+void SendMessage( const char* message );
 void HeartBeat( void );
 
 // -- Hardware Configuration ---
@@ -63,7 +63,7 @@ uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
 uint8_t data[] = "  OK";
 
 unsigned long previousMillis = 0;  // will store last time LED was updated
-const long interval = 1000;  // interval at which to blink (milliseconds)
+const long interval = (1000 * 30);  // interval at which to blink (milliseconds)
 unsigned long heart_count = 0;
 
 //-------------------------------------------------
@@ -141,6 +141,9 @@ void loop()
   HeartBeat();
 }
 
+//-------------------------------------------------
+// Initialize the Radio Interface
+//-------------------------------------------------
 void RadioInit( void )
 {
   pinMode(RFM69_RST, OUTPUT);
@@ -178,7 +181,12 @@ void RadioInit( void )
   Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz");
 }
 
-void SendMessage( char* message )
+//-------------------------------------------------
+// Send a message to the Radio Receiver 
+//
+// @param  message     Pointer to the message String to send
+//-------------------------------------------------
+void SendMessage( const char* message )
 {
   // Send a message to the DESTINATION!
   if (rf69_manager.sendtoWait((uint8_t*)message, strlen(message), SERVER_ADDRESS))
@@ -207,9 +215,13 @@ void SendMessage( char* message )
   }
 }
 
+//-------------------------------------------------
+// Send a Heart Beat Message to let the host know 
+//  The radio is alive 
+//-------------------------------------------------
 void HeartBeat(void)
 {
-  char Heart_Message[20] = "Heart ";
+  String Heart_Message = "Heart ";
     
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) 
@@ -217,9 +229,13 @@ void HeartBeat(void)
     // save the last time you blinked the LED
     previousMillis = currentMillis;
     heart_count++;
-    itoa(heart_count, Heart_Message+7, 12);
 
-    mCPowerLed.Toggle();
-    SendMessage( Heart_Message );
+    Heart_Message += heart_count;
+
+    Serial.println(Heart_Message);
+
+    mCPowerLed.On();
+    SendMessage( Heart_Message.c_str() );
+    mCPowerLed.Off();
   }
 }
