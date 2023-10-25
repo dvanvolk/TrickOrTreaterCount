@@ -1,5 +1,13 @@
-// Mostly an Copy of RadioHead69_AddrDemo_RX, from Adafruit
-
+//=================================================================================================
+/// Arduino Code to read radio interfaces and send them to the serial interface
+///  Mostly an Copy of RadioHead69_AddrDemo_RX, from Adafruit
+///  Code runs on Adafruit Feather M0 RFM69HCW Packet Radio
+///    https://www.adafruit.com/product/3176 
+///
+/// (C) 2023 Daniel VanVolkinburg 
+/// Released under GNU Public License (GPL)
+/// email dvanvolk@ieee.org
+//=================================================================================================
 #include <SPI.h>
 #include <RH_RF69.h>
 #include <RHReliableDatagram.h>
@@ -44,6 +52,7 @@ void setup() {
     Serial.println("RFM69 radio init failed");
     while (1);
   }
+  
   Serial.println("RFM69 radio init OK!");
   // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM (for low power module)
   // No encryption

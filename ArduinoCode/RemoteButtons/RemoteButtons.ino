@@ -1,5 +1,9 @@
 //=================================================================================================
-/// Arduino Code to read button presses and send them to the Receiver 
+/// Arduino Code to read button presses and send them to the Receiver, four indicator LEDs show
+///  status
+///  Mostly an Copy of RadioHead69_AddrDemo_TX, from Adafruit
+///  Code runs on Adafruit Feather M0 RFM69HCW Packet Radio
+///    https://www.adafruit.com/product/3176 
 ///
 /// (C) 2023 Daniel VanVolkinburg 
 /// Released under GNU Public License (GPL)
@@ -15,6 +19,7 @@
 // https://github.com/thomasfredericks/Bounce2
 #include <Bounce2.h>
 
+// -- Function Prototypes ---
 void RadioInit( void );
 void SendMessage( const char* message );
 void HeartBeat( void );
@@ -60,7 +65,6 @@ RH_RF69 rf69(RFM69_CS, RFM69_INT);
 RHReliableDatagram rf69_manager(rf69, RADIO_ADDRESS);
 
 uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
-uint8_t data[] = "  OK";
 
 unsigned long previousMillis = 0;  // will store last time LED was updated
 const long interval = (1000 * 30);  // interval at which to blink (milliseconds)
