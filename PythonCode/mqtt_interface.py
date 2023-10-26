@@ -74,16 +74,12 @@ class mqtt:
         return client
     
     def publish(self, topic, msg_data):
-        msg_dict = {
-                'msg': msg_data
-        }
-        msg = json.dumps(msg_dict)
         if self.client.is_connected():
-            result = self.client.publish(topic, msg)
+            result = self.client.publish(topic, msg_data)
             # result: [0, 1]
             status = result[0]
             if status == 0:
-                print(f'Send `{msg}` to topic `{topic}`')
+                print(f'Send `{msg_data}` to topic `{topic}`')
             else:
                 print(f'Failed to send message to topic {topic}')
         else:

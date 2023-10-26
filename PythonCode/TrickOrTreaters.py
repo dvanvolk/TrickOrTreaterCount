@@ -20,12 +20,14 @@ from mqtt_interface import mqtt
 from adafruit_io import adafruit_io_interface
 
 REPORT_TIME_SEC = 60
+MQTT_SUBSCRIBE = "Halloween\ButtonPress"
+MQTT_PUBLISH_COUNT = "Halloween\TotalCount"
 
 class TrickOrTreaterTracker:
     def __init__(self, mqtt_config, aio_config, serial_port):
         """Init Class and create MQTT interface and Monitoring Thread"""
         self.tc = trick_count()
-        subscribe_list = ["Halloween\ButtonPress"]
+        subscribe_list = [MQTT_SUBSCRIBE]
         self.mqtt_interface = mqtt(mqtt_config, self.__msg_callback, subscribe_list)
 
         self.monitor = True
@@ -43,6 +45,8 @@ class TrickOrTreaterTracker:
     def start(self):
         """Start taking numbers, wait here till the user types "end" """
         self.daemon.start()
+        self.__report_status()
+        self.__report_count_locally()
 
         print("Start Counting")
         
@@ -58,14 +62,17 @@ class TrickOrTreaterTracker:
     def __msg_callback(self, msg_topic):
         """Callback from the MQTT class when a new message is received"""
         self.tc.increase()
+        self.__report_count_locally()
     
     def __count_btn_callback(self):
         """Callback from the button interface when the count should be increased"""
         self.tc.increase()
+        self.__report_count_locally()
         
     def __down_btn_callback(self):
         """Incase of too many button presses, remove the last entry"""
         self.tc.decrease()
+        self.__report_count_locally()
 
     def __process_finish(self):
         """Complete the counting process and show the graph"""
@@ -95,8 +102,11 @@ class TrickOrTreaterTracker:
         self.aio.send_status(self.feedlist[0], int(total_count))
         self.aio.send_status(self.feedlist[1], int(min_count))
         print(f"Report Time Now: {datetime.now()} Last Min Count: {min_count}, Total: {total_count}")
-        # self.tc.mark()
-
+        
+    def __report_count_locally(self):
+        """Publish the count to the MQTT topic, This is only used in the internal MQTT server"""
+        total_count = self.tc.get_total_count() 
+        self.mqtt_interface.publish( MQTT_PUBLISH_COUNT, int(total_count) )
 
 def is_file(value):
     """Called from argparse to ensure the file exists"""

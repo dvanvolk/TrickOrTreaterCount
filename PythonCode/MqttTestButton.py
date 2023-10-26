@@ -20,15 +20,19 @@ class ButtonTest(cmd.Cmd):
         super().__init__()
         """Init Class and create MQTT interface"""
         self.send_topic = "Halloween\ButtonPress"
+        self.count_topic = "Halloween\TotalCount"
         self.mqtt_interface = mqtt(mqtt_config, None, [])
         self.intro = '\n'
         self.prompt = '> '
+        self.test_count = 0
         # use_rawinput = 0
         
     def send_button_press(self):
         """Send a Button Press MQTT Message"""
         print("Button Press")
+        self.test_count = self.test_count + 1
         self.mqtt_interface.publish(self.send_topic, 1)
+        self.mqtt_interface.publish(self.count_topic, self.test_count)
 
     def emptyline(self):
         """Sending an empty line will simulate a button press"""
